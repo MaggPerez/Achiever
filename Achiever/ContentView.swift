@@ -11,6 +11,9 @@ import FirebaseAuth
 struct ContentView: View {
     @State private var email = ""
     @State private var password = ""
+    @State private var navigateToDashboard = false
+    @State private var showAlert = false
+    @State private var showAlertMessage = ""
     
     var body: some View {
         NavigationStack {
@@ -35,12 +38,17 @@ struct ContentView: View {
                     SecureField("Password", text: $password)
                         .textFieldStyle(.roundedBorder)
                     
-                    Button("Sign In", action: signIn)
-                        .buttonStyle(.borderedProminent)
+                    Button("Sign in"){
+                        signIn()
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
                 
             }
             .padding()
+            .navigationDestination(isPresented: $navigateToDashboard) {
+                DashboardView()
+            }
             
             HStack {
                 Text("Don't have an account?")
@@ -48,14 +56,52 @@ struct ContentView: View {
                     RegisterView()
                 }
             }
+            .alert("Error in registering", isPresented: $showAlert) {
+                Button("Ok", role: .cancel) { }
+            } message: {
+                Text(showAlertMessage)
+            }
+        }
+    }
+    
+    /**
+     Function that handles sign in
+     */
+    private func signIn() {
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                // Handle sign in error
+                print("Error signing in: \(error.localizedDescription)")
+                
+                // You can cast the error to AuthErrorCode for more specific handling
+                if let authError = error as? AuthErrorCode {
+                    switch authError.code {
+                    case .invalidEmail:
+                        print("The email address is not valid.")
+                    case .userNotFound:
+                        print("User not found")
+                    case .operationNotAllowed:
+                        print("Email/Password sign-in is not enabled for this project.")
+                    default:
+                        print("Unhandled Firebase Auth error: \(authError.localizedDescription)")
+                    }
+                }
+                // Set the alert message and show the alert
+                showAlertMessage = error.localizedDescription
+                showAlert = true
+                
+            } else {
+                // Success! User is signed in
+                print("User signed in successfully!")
+                if let user = authResult?.user {
+                    print("Signed in user ID: \(user.uid)")
+                    navigateToDashboard = true
+                }
+            }
         }
     }
 }
 
-func signIn() {
-    // TODO: Implement sign in functionality
-    print("Sign in tapped")
-}
 
 
 
