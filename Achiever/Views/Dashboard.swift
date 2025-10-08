@@ -10,9 +10,9 @@ import FirebaseAuth
 
 struct DashboardView: View {
     @State private var name = Auth.auth().currentUser?.email ?? "User"
-    @State private var showDeposit = false
-    @State private var showWithdraw = false
-    @State private var showStatements = false
+    @State private var showCreateTask = false
+    @State private var showViewTask = false
+    
     
     var body: some View {
         NavigationStack {
@@ -23,15 +23,12 @@ struct DashboardView: View {
                     
                 Grid(alignment: .center) {
                     GridRow {
-                        Button("Deposit") {
-                            showDeposit = true
+                        Button("Create Task") {
+                            showCreateTask = true
                         }
                         
-                        Button("Withdraw") {
-                            showWithdraw = true
-                        }
-                        Button("Statements"){
-                            showStatements = true
+                        Button("View Tasks") {
+                            showViewTask = true
                         }
                     }
                     .padding()
@@ -48,14 +45,11 @@ struct DashboardView: View {
             }
             .navigationTitle("Dashboard")
             .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $showDeposit) {
-                DepositView()
+            .navigationDestination(isPresented: $showCreateTask) {
+                CreateTaskView()
             }
-            .navigationDestination(isPresented: $showWithdraw) {
+            .navigationDestination(isPresented: $showViewTask) {
 //                Withdraw()
-            }
-            .navigationDestination(isPresented: $showStatements) {
-//                Statements()
             }
             .padding(.top, 4)
             .padding(.horizontal)
